@@ -9,33 +9,38 @@ namespace ExamplePlugin
     [BepInDependency(R2API.R2API.PluginGUID)]
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     [R2APISubmoduleDependency(nameof(ItemAPI), nameof(LanguageAPI))]
-    public class ExamplePlugin : BaseUnityPlugin
+    internal class ExamplePlugin : BaseUnityPlugin
     {
-        public const string PluginGUID = PluginAuthor + "." + PluginName;
-        public const string PluginAuthor = "Yariazen-NFox18212";
-        public const string PluginName = "ExamplePlugin";
-        public const string PluginVersion = "1.0.0";
+        internal const string PluginGUID = PluginAuthor + "." + PluginName;
+        internal const string PluginAuthor = "Yariazen-Nfox18212";
+        internal const string PluginName = "ExamplePlugin";
+        internal const string PluginVersion = "1.0.0";
+
+        internal string CurrentTrackName { get; set; }
 
         public ExamplePlugin()
         {
             Log.Init(Logger);
-            Harmony harmony = new Harmony(PluginGUID);
-            harmony.Patch(
-                original: AccessTools.Method(typeof(MusicController), nameof(MusicController.PickCurrentTrack)),
-                prefix: new HarmonyMethod(typeof(ExamplePlugin), nameof(ExamplePlugin.Postfix_MusicController_PickCurrentTrack))
-            );
+            On.RoR2.MusicController.UpdateState += GetTrackName;
         }
 
-        public void Awake()
+        internal void Awake()
         {
             Log.LogInfo($"{nameof(Awake)} done.");
         }
 
-        private static void Postfix_MusicController_PickCurrentTrack(ref MusicTrackDef newTrack)
+        internal void GetTrackName(On.RoR2.MusicController.orig_UpdateState orig, MusicController self)
         {
-            if (newTrack != null)
+            orig(self);
+
+            if (self && self.currentTrack)
             {
-                Log.LogInfo($"{newTrack.cachedName}");
+                string NewTrackName = self.currentTrack.cachedName;
+                if(NewTrackName != CurrentTrackName)
+                {
+                    CurrentTrackName = NewTrackName;
+                    Log.LogInfo($"{CurrentTrackName}");
+                }
             }
         }
     }
