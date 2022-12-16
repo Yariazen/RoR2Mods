@@ -1,6 +1,8 @@
 using BepInEx;
 using R2API;
 using R2API.Utils;
+using HarmonyLib;
+using RoR2;
 
 namespace ExamplePlugin
 {
@@ -17,6 +19,11 @@ namespace ExamplePlugin
         public ExamplePlugin()
         {
             Log.Init(Logger);
+            Harmony harmony = new Harmony(PluginGUID);
+            harmony.Patch(
+                original: AccessTools.Method(typeof(MusicController), nameof(MusicController.PickCurrentTrack)),
+                prefix: new HarmonyMethod(typeof(ExamplePlugin), nameof(ExamplePlugin.Postfix_MusicController_PickCurrentTrack))
+            );
         }
 
         public void Awake()
@@ -24,9 +31,12 @@ namespace ExamplePlugin
             Log.LogInfo($"{nameof(Awake)} done.");
         }
 
-        private void Update() 
+        private static void Postfix_MusicController_PickCurrentTrack(ref MusicTrackDef newTrack)
         {
-            // Log.LogInfo($"{nameof(Update)} done.");
+            if (newTrack != null)
+            {
+                Log.LogInfo($"{newTrack.cachedName}");
+            }
         }
     }
 }
