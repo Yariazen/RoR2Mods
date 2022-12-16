@@ -10,16 +10,23 @@ namespace ExamplePlugin
     public class ExamplePlugin : BaseUnityPlugin
     {
         public const string PluginGUID = PluginAuthor + "." + PluginName;
-        public const string PluginAuthor = "Yariazen/NFox18212";
+        public const string PluginAuthor = "Yariazen-NFox18212";
         public const string PluginName = "ExamplePlugin";
         public const string PluginVersion = "1.0.0";
 
-        public void Awake()
+        public ExamplePlugin()
         {
             Log.Init(Logger);
-            Log.LogInfo(nameof(Awake) + " done.");
         }
 
-        private void Update() { }
+        public void Awake()
+        {
+            Log.LogInfo($"{nameof(Awake)} done.");
+        }
+
+        private void Update() 
+        {
+            // Log.LogInfo($"{nameof(Update)} done.");
+        }
     }
 }
