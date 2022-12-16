@@ -1,7 +1,6 @@
 using BepInEx;
 using R2API;
 using R2API.Utils;
-using HarmonyLib;
 using RoR2;
 
 namespace ExamplePlugin
@@ -40,6 +39,10 @@ namespace ExamplePlugin
                 {
                     CurrentTrackName = NewTrackName;
                     Log.LogInfo($"{CurrentTrackName}");
+                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage()
+                    {
+                        baseToken = $"Current Song: {CurrentTrackName}"
+                    });
                 }
             }
         }
