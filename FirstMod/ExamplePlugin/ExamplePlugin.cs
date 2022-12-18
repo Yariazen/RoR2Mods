@@ -1,4 +1,9 @@
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using BepInEx;
+using HarmonyLib;
+using IL.RoR2.WwiseUtils;
 using R2API;
 using R2API.Utils;
 using RoR2;
@@ -19,6 +24,12 @@ namespace ExamplePlugin
 
         public ExamplePlugin()
         {
+            Harmony harmony = new Harmony(PluginGUID);
+            harmony.Patch(
+                original: AccessTools.Method(typeof(RoR2.WwiseUtils.SoundbankLoader),
+                    nameof(RoR2.WwiseUtils.SoundbankLoader.Start)),
+                postfix: new HarmonyMethod(typeof(ExamplePlugin), nameof(GetSoundbankStrings)));
+            
             Log.Init(Logger);
             On.RoR2.MusicController.UpdateState += GetTrackName;
         }
@@ -44,6 +55,23 @@ namespace ExamplePlugin
                         baseToken = $"Current Song: {CurrentTrackName}"
                     });
                 }
+            }
+        }
+
+        internal void GetSoundbankStrings(ref RoR2.WwiseUtils.SoundbankLoader __instance)
+        {
+            var bankStrings = __instance.soundbankStrings;
+            if (bankStrings != null)
+            {
+                List<string> soundbank = bankStrings.ToList();
+                foreach (var s in soundbank)
+                {
+                    Log.LogInfo(s);
+                }
+            }
+            else
+            { 
+                Log.LogInfo("bankStrings is null");
             }
         }
     }
